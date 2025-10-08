@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	// "github.com/golang-jwt/jwt"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -88,5 +87,23 @@ func Login(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "success",
 	})
+}
 
+func User(c *fiber.Ctx) error {
+	cooke := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cooke, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error){
+		return []byte(SecretKey), nil
+	})
+
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "unauthenticated",
+		})
+	}
+
+	claims := token.Claims
+
+	return c.JSON(claims)
 }
